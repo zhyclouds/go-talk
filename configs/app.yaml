@@ -1,0 +1,19 @@
+app:
+  host: localhost
+  port: 8080
+  runMode: debug
+
+db:
+  mysql:
+    address: 127.0.0.1:3306
+    user: root     # 你本地 mysql 的用户名
+    password: zhy1021@ # 你本地的 mysql 用户密码
+    dbName: go_talk # 这里是你在 mysql 建立的数据库名称
+    maxIdle: 20
+    maxOpen: 20
+    maxLifetime: 100
+
+log:
+  logSavePath: logs
+  logFileExt: log
+  timeFormat: 2006-01-02 - 15:04:05.000
