@@ -14,7 +14,6 @@ var once sync.Once
 // 初始化函数
 func init() {
 	once.Do(func() {
-		// TODO 初始化
 		config.ReadCfg()
 		config.Init()
 		log.Init()
@@ -24,7 +23,6 @@ func init() {
 
 // main 函数
 func main() {
-	// TODO 程序入口
 	r := gin.Default()
 
 	handle(r)
