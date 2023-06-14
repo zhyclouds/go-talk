@@ -13,6 +13,12 @@ db:
     maxOpen: 20
     maxLifetime: 100
 
+  mongodb:
+    address: mongodb://127.0.0.1:27017
+    username:
+    password:
+    dbName: go_talk
+
 log:
   logSavePath: logs
   logFileExt: log

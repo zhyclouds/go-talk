@@ -23,6 +23,13 @@ type Mysql struct {
 	MaxLifetime time.Duration
 }
 
+type Mongodb struct {
+	Address  string
+	Username string
+	Password string
+	DBName   string
+}
+
 type Redis struct {
 	Host        string
 	Password    string
@@ -38,10 +45,11 @@ type Log struct {
 }
 
 var (
-	AppCfg   App
-	MysqlCfg Mysql
-	RedisCfg Redis
-	LogCfg   Log
+	AppCfg     App
+	MysqlCfg   Mysql
+	MongodbCfg Mongodb
+	RedisCfg   Redis
+	LogCfg     Log
 )
 
 func Init() {
@@ -53,6 +61,10 @@ func Init() {
 
 	if err = conf.UnmarshalKey("db.mysql", &MysqlCfg); err != nil {
 		logrus.Panicf("parse config err, mysql: %v", err)
+	}
+
+	if err = conf.UnmarshalKey("db.mongodb", &MongodbCfg); err != nil {
+		logrus.Panicf("parse config err, mongodb: %v", err)
 	}
 
 	if err = conf.UnmarshalKey("db.redis", &RedisCfg); err != nil {

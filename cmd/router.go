@@ -19,4 +19,5 @@ func handle(r *gin.Engine) {
 		// 新用户注册
 		userGroup.POST("/login", ctrl.Login)
 	}
+
 }

@@ -22,7 +22,7 @@ type UserLoginReq struct {
 }
 
 type UserLoginResp struct {
-	UserId int64 `json:"user_id"`
+	UserId uint `json:"user_id"`
 }
 
 type UserRegisterReq struct {
@@ -31,7 +31,7 @@ type UserRegisterReq struct {
 }
 
 type UserRegisterResp struct {
-	UserId int64 `json:"user_id"`
+	UserId uint `json:"user_id"`
 }
 
 // Register 用户注册
@@ -66,7 +66,7 @@ func (u *User) Register(c *gin.Context) (interface{}, error) {
 	db.MySQL.Debug().Create(&user)
 
 	return UserRegisterResp{
-		UserId: user.Id,
+		UserId: user.ID,
 	}, nil
 }
 
@@ -96,6 +96,6 @@ func (u *User) Login(c *gin.Context) (interface{}, error) {
 	}
 
 	return UserLoginResp{
-		UserId: user.Id,
+		UserId: user.ID,
 	}, nil
 }
