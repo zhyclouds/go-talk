@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"go-talk/common/config"
-	"go-talk/common/model"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -37,15 +36,15 @@ func MySQLInit() {
 	db.SetConnMaxLifetime(config.MysqlCfg.MaxLifetime) // 设置连接最大存活时间
 
 	//自动建表
-	AutoCreateTable()
+	//AutoCreateTable()
 }
 
-func AutoCreateTable() {
-	_ = MySQL.AutoMigrate(
-		&model.User{},
-	)
-
-}
+//func AutoCreateTable() {
+//	_ = MySQL.AutoMigrate(
+//		&model.User{},
+//	)
+//
+//}
 
 func createDSN(dbInfo struct {
 	Addr string

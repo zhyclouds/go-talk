@@ -18,6 +18,8 @@ func handle(r *gin.Engine) {
 		userGroup.POST("/register", ctrl.Register)
 		// 新用户注册
 		userGroup.POST("/login", ctrl.Login)
+		// 添加好友
+		userGroup.POST("/add/friend", ctrl.AddFriend)
 	}
 
 }

@@ -44,3 +44,31 @@ func Login(c *gin.Context) {
 		"userId": data.UserId,
 	})
 }
+
+func AddFriend(c *gin.Context) {
+	var u service.User
+	addFriend, err := u.AddFriend(c)
+	if err != nil {
+		if err == service.ErrIdEmpty {
+			res.Error(c, res.Status{
+				StatusCode: res.IdEmptyErrorStatus.StatusCode,
+				StatusMsg:  res.IdEmptyErrorStatus.StatusMsg,
+			})
+		} else if err == service.ErrIsFriend {
+			res.Error(c, res.Status{
+				StatusCode: res.IsFriendErrorStatus.StatusCode,
+				StatusMsg:  res.IsFriendErrorStatus.StatusMsg,
+			})
+		} else {
+			res.Error(c, res.Status{
+				StatusCode: res.AddFriendErrorStatus.StatusCode,
+				StatusMsg:  res.AddFriendErrorStatus.StatusMsg,
+			})
+		}
+		return
+	}
+	data := addFriend.(service.UserAddFriendResp)
+	res.Success(c, res.R{
+		"message": data.Msg,
+	})
+}

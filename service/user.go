@@ -7,12 +7,16 @@ import (
 	"go-talk/common/db"
 	"go-talk/common/log"
 	"go-talk/common/model"
+	"go-talk/utils"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
+	"time"
 )
 
 var ErrUsernameExits = errors.New("username already exists")
 var ErrEmpty = errors.New("username or password is empty")
+var ErrIdEmpty = errors.New("user id is empty")
+var ErrIsFriend = errors.New("already friends")
 
 type User struct{}
 
@@ -32,6 +36,10 @@ type UserRegisterReq struct {
 
 type UserRegisterResp struct {
 	UserId uint `json:"user_id"`
+}
+
+type UserAddFriendResp struct {
+	Msg string `json:"msg"`
 }
 
 // Register 用户注册
@@ -97,5 +105,55 @@ func (u *User) Login(c *gin.Context) (interface{}, error) {
 
 	return UserLoginResp{
 		UserId: user.ID,
+	}, nil
+}
+
+func (u *User) AddFriend(c *gin.Context) (interface{}, error) {
+	userId := c.PostForm("user_id")
+	friendId := c.PostForm("friend_id")
+	if userId == "" || friendId == "" {
+		return nil, ErrIdEmpty
+	}
+
+	if model.JudgeUserIsFriend(userId, friendId) {
+		return nil, ErrIsFriend
+	}
+	// 保存房间记录
+	rb := &model.RoomBasic{
+		Identity:     utils.GetUUID(),
+		UserIdentity: userId,
+		CreatedAt:    time.Now().Unix(),
+		UpdatedAt:    time.Now().Unix(),
+	}
+	if err := model.InsertOneRoomBasic(rb); err != nil {
+		log.Logger.Error("[DB ERROR]", zap.Error(err))
+		return nil, err
+	}
+	// 保存用户与房间的关联记录
+	ur := &model.UserRoom{
+		UserIdentity: userId,
+		RoomIdentity: rb.Identity,
+		RoomType:     1,
+		CreatedAt:    time.Now().Unix(),
+		UpdatedAt:    time.Now().Unix(),
+	}
+	if err := model.InsertOneUserRoom(ur); err != nil {
+		log.Logger.Error("[DB ERROR]", zap.Error(err))
+		return nil, err
+	}
+	ur = &model.UserRoom{
+		UserIdentity: friendId,
+		RoomIdentity: rb.Identity,
+		RoomType:     1,
+		CreatedAt:    time.Now().Unix(),
+		UpdatedAt:    time.Now().Unix(),
+	}
+	if err := model.InsertOneUserRoom(ur); err != nil {
+		log.Logger.Error("[DB ERROR]", zap.Error(err))
+		return nil, err
+	}
+
+	return UserAddFriendResp{
+		Msg: "添加成功",
 	}, nil
 }

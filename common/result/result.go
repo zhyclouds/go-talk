@@ -23,6 +23,9 @@ var (
 	FollowErrorStatus       = newStatus(40011, "关注失败")
 	FavoriteErrorStatus     = newStatus(40012, "点赞失败")
 	FollowListErrorStatus   = newStatus(40013, "获取关注列表时发生了错误")
+	IdEmptyErrorStatus      = newStatus(40014, "用户id为空")
+	IsFriendErrorStatus     = newStatus(40015, "已经是好友了")
+	AddFriendErrorStatus    = newStatus(40016, "添加好友失败")
 
 	// 401 WITHOUT PERMISSION
 	NoLoginErrorStatus = newStatus(40101, "用户未登录")
