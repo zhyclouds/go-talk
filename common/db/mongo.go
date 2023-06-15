@@ -18,5 +18,5 @@ func MongoInit() {
 		return
 	}
 	Mongo = client.Database(config.MongodbCfg.DBName)
-	logrus.Infof("Connected mysql success")
+	logrus.Infof("Connected MongoDB success")
 }

@@ -25,7 +25,7 @@ func Register(c *gin.Context) {
 	}
 	data := register.(service.UserRegisterResp)
 	res.Success(c, res.R{
-		"userId": data.UserId,
+		"identity": data.Identity,
 	})
 }
 
@@ -41,7 +41,7 @@ func Login(c *gin.Context) {
 	}
 	data := login.(service.UserLoginResp)
 	res.Success(c, res.R{
-		"userId": data.UserId,
+		"identity": data.Identity,
 	})
 }
 

@@ -9,6 +9,6 @@ var MySQL *gorm.DB
 var Mongo *mongo.Database
 
 func Init() {
-	MySQLInit()
+	// MySQLInit()
 	MongoInit()
 }

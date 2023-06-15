@@ -1,11 +1,62 @@
 package model
 
-import "gorm.io/gorm"
+import (
+	"context"
+	"go-talk/common/db"
+	"go.mongodb.org/mongo-driver/bson"
+)
 
 type User struct {
-	gorm.Model
-	Name     string `gorm:"not null;unique;index"`
-	Username string `gorm:"not null;unique;index"`
-	Password string `gorm:"not null"`
-	Avatar   string `gorm:"default:'https://p3.itc.cn/images03/20200516/0346a117a87b453fbd6d7b1d6698923d.jpeg'"`
+	Identity  string `bson:"identity"`
+	Account   string `bson:"account"`
+	Password  string `bson:"password"`
+	Nickname  string `bson:"nickname"`
+	Sex       int    `bson:"sex"`
+	Email     string `bson:"email"`
+	Avatar    string `bson:"avatar"`
+	CreatedAt int64  `bson:"created_at"`
+	UpdatedAt int64  `bson:"updated_at"`
+}
+
+func (User) CollectionName() string {
+	return "user_basic"
+}
+
+func GetUserBasicByAccountPassword(account, password string) (*User, error) {
+	ub := new(User)
+	err := db.Mongo.Collection(User{}.CollectionName()).
+		FindOne(context.Background(), bson.D{{"account", account}, {"password", password}}).
+		Decode(ub)
+	return ub, err
+}
+
+func GetUserBasicByIdentity(identity string) (*User, error) {
+	ub := new(User)
+	err := db.Mongo.Collection(User{}.CollectionName()).
+		FindOne(context.Background(), bson.D{{"identity", identity}}).
+		Decode(ub)
+	return ub, err
+}
+
+func GetUserBasicByAccount(account string) (*User, error) {
+	ub := new(User)
+	err := db.Mongo.Collection(User{}.CollectionName()).
+		FindOne(context.Background(), bson.D{{"account", account}}).
+		Decode(ub)
+	return ub, err
+}
+
+func GetUserBasicCountByEmail(email string) (int64, error) {
+	return db.Mongo.Collection(User{}.CollectionName()).
+		CountDocuments(context.Background(), bson.D{{"email", email}})
+}
+
+func GetUserBasicCountByAccount(account string) (int64, error) {
+	return db.Mongo.Collection(User{}.CollectionName()).
+		CountDocuments(context.Background(), bson.D{{"account", account}})
+}
+
+func InsertOneUserBasic(ub *User) error {
+	_, err := db.Mongo.Collection(User{}.CollectionName()).InsertOne(context.Background(), ub)
+	return err
 }

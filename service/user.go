@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
-	"go-talk/common/db"
 	"go-talk/common/log"
 	"go-talk/common/model"
 	"go-talk/utils"
@@ -21,21 +20,22 @@ var ErrIsFriend = errors.New("already friends")
 type User struct{}
 
 type UserLoginReq struct {
-	Username string `form:"username" binding:"required,min=1,max=32"`
+	Account  string `form:"account" binding:"required,min=1,max=32"`
 	Password string `form:"password" binding:"required,min=6,max=32"`
 }
 
 type UserLoginResp struct {
-	UserId uint `json:"user_id"`
+	Identity string `json:"identity"`
 }
 
 type UserRegisterReq struct {
-	Username string `form:"username" binding:"required,min=1,max=32"`
+	Account  string `form:"account" binding:"required,min=1,max=32"`
 	Password string `form:"password" binding:"required,min=6,max=32"`
+	Email    string `form:"email"`
 }
 
 type UserRegisterResp struct {
-	UserId uint `json:"user_id"`
+	Identity string `json:"identity"`
 }
 
 type UserAddFriendResp struct {
@@ -52,29 +52,32 @@ func (u *User) Register(c *gin.Context) (interface{}, error) {
 	}
 
 	// 检查是否已经注册
-	var count int64
-	err = db.MySQL.Debug().Model(&model.User{}).Where("username = ?", req.Username).Count(&count).Error
+	cnt, err := model.GetUserBasicCountByAccount(req.Account)
 	if err != nil {
-		log.Logger.Error("mysql happen error", zap.Error(err))
+		log.Logger.Error("MongoDB happen error", zap.Error(err))
 		return nil, err
 	}
-	if count != 0 {
-		log.Logger.Error("user already exist")
+	if cnt > 0 {
 		return nil, ErrUsernameExits
 	}
 
 	// 加密
 	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	user := model.User{
-		Name:     req.Username,
-		Username: req.Username,
+		Identity: utils.GetUUID(),
+		Account:  req.Account,
 		Password: string(hash),
+		Email:    req.Email,
 	}
 
-	db.MySQL.Debug().Create(&user)
+	err = model.InsertOneUserBasic(&user)
+	if err != nil {
+		log.Logger.Error("MongoDB happen error", zap.Error(err))
+		return nil, err
+	}
 
 	return UserRegisterResp{
-		UserId: user.ID,
+		Identity: user.Identity,
 	}, nil
 }
 
@@ -89,22 +92,21 @@ func (u *User) Login(c *gin.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	var user model.User
-	err = db.MySQL.Debug().Where("username = ?", req.Username).First(&user).Error
+	ub, err := model.GetUserBasicByAccount(req.Account)
 	if err != nil {
-		log.Logger.Error("mysql happen error")
+		log.Logger.Error("MongoDB happen error", zap.Error(err))
 		return nil, err
 	}
 
 	// 检查密码
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
+	err = bcrypt.CompareHashAndPassword([]byte(ub.Password), []byte(req.Password))
 	if err != nil {
-		log.Logger.Error("password error", zap.Any("user", user))
+		log.Logger.Error("password error", zap.Any("user", ub))
 		return nil, err
 	}
 
 	return UserLoginResp{
-		UserId: user.ID,
+		Identity: ub.Identity,
 	}, nil
 }
 
