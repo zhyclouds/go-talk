@@ -14,6 +14,8 @@ var (
 	LoginErrorStatus        = newStatus(40002, "登录发生错误")
 	RegisterErrorStatus     = newStatus(40003, "注册发生错误")
 	UsernameExitErrorStatus = newStatus(40004, "用户名已存在")
+	NotFriendErrorStatus    = newStatus(40005, "不是好友")
+	DeleteFriendErrorStatus = newStatus(40006, "删除好友失败")
 	TokenErrorStatus        = newStatus(40005, "token 错误")
 	InfoErrorStatus         = newStatus(40006, "无法获取该用户信息")
 	FileErrorStatus         = newStatus(40007, "文件上传失败")

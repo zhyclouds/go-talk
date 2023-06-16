@@ -87,12 +87,12 @@ func InsertOneUserRoom(ur *UserRoom) error {
 	return err
 }
 
-// DeleteUserRoom 删除一条用户房间记录, 删除好友关系
-func DeleteUserRoom(userIdentity, roomIdentity string) error {
+// DeleteUserRoom 删除所有用户房间记录, 删除好友关系
+func DeleteUserRoom(roomIdentity string) error {
 	_, err := db.Mongo.Collection(UserRoom{}.CollectionName()).
-		DeleteOne(context.Background(), bson.M{"user_identity": userIdentity, "room_identity": roomIdentity})
+		DeleteMany(context.Background(), bson.M{"room_identity": roomIdentity})
 	if err != nil {
-		log.Logger.Error("[DB ERROR]", zap.Error(err))
+		log.Logger.Error("[DB ERROR]:%v\n", zap.Error(err))
 		return err
 	}
 	return nil

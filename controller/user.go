@@ -80,3 +80,31 @@ func AddFriend(c *gin.Context) {
 		"message": data.Msg,
 	})
 }
+
+func DeleteFriend(c *gin.Context) {
+	var u service.User
+	delFriend, err := u.DeleteFriend(c)
+	if err != nil {
+		if err == service.ErrIdEmpty {
+			res.Error(c, res.Status{
+				StatusCode: res.IdEmptyErrorStatus.StatusCode,
+				StatusMsg:  res.IdEmptyErrorStatus.StatusMsg,
+			})
+		} else if err == service.ErrNotFriend {
+			res.Error(c, res.Status{
+				StatusCode: res.NotFriendErrorStatus.StatusCode,
+				StatusMsg:  res.NotFriendErrorStatus.StatusMsg,
+			})
+		} else {
+			res.Error(c, res.Status{
+				StatusCode: res.DeleteFriendErrorStatus.StatusCode,
+				StatusMsg:  res.DeleteFriendErrorStatus.StatusMsg,
+			})
+		}
+	}
+
+	data := delFriend.(service.UserDelFriendResp)
+	res.Success(c, res.R{
+		"message": data.Msg,
+	})
+}

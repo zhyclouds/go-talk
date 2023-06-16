@@ -22,6 +22,9 @@ func handle(r *gin.Engine) {
 	{
 		// 添加好友
 		userGroup.POST("/add/friend", ctrl.AddFriend)
+
+		// 删除好友
+		userGroup.POST("/delete/friend", ctrl.DeleteFriend)
 	}
 
 }

@@ -16,6 +16,7 @@ var ErrUsernameExits = errors.New("username already exists")
 var PasswordErr = errors.New("password error")
 var ErrIdEmpty = errors.New("user account is empty")
 var ErrIsFriend = errors.New("already friends")
+var ErrNotFriend = errors.New("not friends")
 
 type User struct{}
 
@@ -39,6 +40,10 @@ type UserRegisterResp struct {
 }
 
 type UserAddFriendResp struct {
+	Msg string `json:"msg"`
+}
+
+type UserDelFriendResp struct {
 	Msg string `json:"msg"`
 }
 
@@ -178,5 +183,43 @@ func (u *User) AddFriend(c *gin.Context) (interface{}, error) {
 
 	return UserAddFriendResp{
 		Msg: "添加成功",
+	}, nil
+}
+
+// DeleteFriend 删除好友
+func (u *User) DeleteFriend(c *gin.Context) (interface{}, error) {
+	account := c.PostForm("account")
+	if account == "" {
+		return nil, ErrIdEmpty
+	}
+
+	friend, err := model.GetUserBasicByAccount(account)
+	if err != nil {
+		log.Logger.Error("[DB ERROR]", zap.Error(err))
+		return nil, err
+	}
+
+	user := c.MustGet("user_claims").(*utils.UserClaims)
+
+	// 获取房间identity
+	roomIdentity := model.GetUserRoomIdentity(friend.Identity, user.Identity)
+	if roomIdentity == "" {
+		return nil, ErrNotFriend
+	}
+
+	// 删除用户房间关联
+	if err := model.DeleteUserRoom(roomIdentity); err != nil {
+		log.Logger.Error("[DB ERROR]", zap.Error(err))
+		return nil, err
+	}
+
+	// 删除房间
+	if err := model.DeleteRoomBasic(roomIdentity); err != nil {
+		log.Logger.Error("[DB ERROR]", zap.Error(err))
+		return nil, err
+	}
+
+	return UserDelFriendResp{
+		Msg: "删除成功",
 	}, nil
 }
