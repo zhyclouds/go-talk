@@ -13,8 +13,8 @@ import (
 )
 
 var ErrUsernameExits = errors.New("username already exists")
-var ErrEmpty = errors.New("username or password is empty")
-var ErrIdEmpty = errors.New("user id is empty")
+var PasswordErr = errors.New("password error")
+var ErrIdEmpty = errors.New("user account is empty")
 var ErrIsFriend = errors.New("already friends")
 
 type User struct{}
@@ -25,7 +25,7 @@ type UserLoginReq struct {
 }
 
 type UserLoginResp struct {
-	Identity string `json:"identity"`
+	Token string `json:"token"`
 }
 
 type UserRegisterReq struct {
@@ -35,7 +35,7 @@ type UserRegisterReq struct {
 }
 
 type UserRegisterResp struct {
-	Identity string `json:"identity"`
+	Token string `json:"token"`
 }
 
 type UserAddFriendResp struct {
@@ -76,8 +76,14 @@ func (u *User) Register(c *gin.Context) (interface{}, error) {
 		return nil, err
 	}
 
+	token, err := utils.GenerateToken(user.Identity, user.Email)
+	if err != nil {
+		log.Logger.Error("GenerateToken error", zap.Error(err))
+		return nil, err
+	}
+
 	return UserRegisterResp{
-		Identity: user.Identity,
+		Token: token,
 	}, nil
 }
 
@@ -102,28 +108,43 @@ func (u *User) Login(c *gin.Context) (interface{}, error) {
 	err = bcrypt.CompareHashAndPassword([]byte(ub.Password), []byte(req.Password))
 	if err != nil {
 		log.Logger.Error("password error", zap.Any("user", ub))
+		return nil, PasswordErr
+	}
+
+	// 生成token
+	token, err := utils.GenerateToken(ub.Identity, ub.Email)
+	if err != nil {
+		log.Logger.Error("GenerateToken error", zap.Error(err))
 		return nil, err
 	}
 
 	return UserLoginResp{
-		Identity: ub.Identity,
+		Token: token,
 	}, nil
 }
 
+// AddFriend 添加好友
 func (u *User) AddFriend(c *gin.Context) (interface{}, error) {
-	userId := c.PostForm("user_id")
-	friendId := c.PostForm("friend_id")
-	if userId == "" || friendId == "" {
+	account := c.PostForm("account")
+	if account == "" {
 		return nil, ErrIdEmpty
 	}
 
-	if model.JudgeUserIsFriend(userId, friendId) {
+	friend, err := model.GetUserBasicByAccount(account)
+	if err != nil {
+		log.Logger.Error("[DB ERROR]", zap.Error(err))
+		return nil, err
+	}
+
+	user := c.MustGet("user_claims").(*utils.UserClaims)
+
+	if model.JudgeUserIsFriend(friend.Identity, user.Identity) {
 		return nil, ErrIsFriend
 	}
 	// 保存房间记录
 	rb := &model.RoomBasic{
 		Identity:     utils.GetUUID(),
-		UserIdentity: userId,
+		UserIdentity: user.Identity,
 		CreatedAt:    time.Now().Unix(),
 		UpdatedAt:    time.Now().Unix(),
 	}
@@ -133,7 +154,7 @@ func (u *User) AddFriend(c *gin.Context) (interface{}, error) {
 	}
 	// 保存用户与房间的关联记录
 	ur := &model.UserRoom{
-		UserIdentity: userId,
+		UserIdentity: user.Identity,
 		RoomIdentity: rb.Identity,
 		RoomType:     1,
 		CreatedAt:    time.Now().Unix(),
@@ -144,7 +165,7 @@ func (u *User) AddFriend(c *gin.Context) (interface{}, error) {
 		return nil, err
 	}
 	ur = &model.UserRoom{
-		UserIdentity: friendId,
+		UserIdentity: friend.Identity,
 		RoomIdentity: rb.Identity,
 		RoomType:     1,
 		CreatedAt:    time.Now().Unix(),

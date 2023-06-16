@@ -44,12 +44,17 @@ type Log struct {
 	TimeFormat  string
 }
 
+type Jwt struct {
+	SigningKey string
+}
+
 var (
 	AppCfg     App
 	MysqlCfg   Mysql
 	MongodbCfg Mongodb
 	RedisCfg   Redis
 	LogCfg     Log
+	JwtCfg     Jwt
 )
 
 func Init() {
@@ -73,6 +78,10 @@ func Init() {
 
 	if err = conf.UnmarshalKey("log", &LogCfg); err != nil {
 		logrus.Panicf("parse config err, log: %v", err)
+	}
+
+	if err = conf.UnmarshalKey("jwt", &JwtCfg); err != nil {
+		logrus.Panicf("parse config err, jwt: %v", err)
 	}
 
 	logrus.Debug("parse config success")

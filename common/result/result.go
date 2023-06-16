@@ -26,6 +26,7 @@ var (
 	IdEmptyErrorStatus      = newStatus(40014, "用户id为空")
 	IsFriendErrorStatus     = newStatus(40015, "已经是好友了")
 	AddFriendErrorStatus    = newStatus(40016, "添加好友失败")
+	PasswordErrorStatus     = newStatus(40017, "密码错误")
 
 	// 401 WITHOUT PERMISSION
 	NoLoginErrorStatus = newStatus(40101, "用户未登录")

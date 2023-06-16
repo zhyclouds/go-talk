@@ -25,7 +25,7 @@ func Register(c *gin.Context) {
 	}
 	data := register.(service.UserRegisterResp)
 	res.Success(c, res.R{
-		"identity": data.Identity,
+		"token": data.Token,
 	})
 }
 
@@ -33,15 +33,23 @@ func Login(c *gin.Context) {
 	var u service.User
 	login, err := u.Login(c)
 	if err != nil {
-		res.Error(c, res.Status{
-			StatusCode: res.LoginErrorStatus.StatusCode,
-			StatusMsg:  res.LoginErrorStatus.StatusMsg,
-		})
-		return
+		if err == service.PasswordErr {
+			res.Error(c, res.Status{
+				StatusCode: res.PasswordErrorStatus.StatusCode,
+				StatusMsg:  res.PasswordErrorStatus.StatusMsg,
+			})
+			return
+		} else {
+			res.Error(c, res.Status{
+				StatusCode: res.LoginErrorStatus.StatusCode,
+				StatusMsg:  res.LoginErrorStatus.StatusMsg,
+			})
+			return
+		}
 	}
 	data := login.(service.UserLoginResp)
 	res.Success(c, res.R{
-		"identity": data.Identity,
+		"token": data.Token,
 	})
 }
 
