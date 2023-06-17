@@ -32,5 +32,8 @@ func handle(r *gin.Engine) {
 	{
 		// 获取用户聊天消息列表
 		chatGroup.GET("/chatlist", ctrl.ChatList)
+
+		// 发送消息
+		chatGroup.GET("/websocket/message", ctrl.WebsocketMessage)
 	}
 }
