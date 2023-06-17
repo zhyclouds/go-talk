@@ -27,4 +27,10 @@ func handle(r *gin.Engine) {
 		userGroup.POST("/delete/friend", ctrl.DeleteFriend)
 	}
 
+	// 聊天相关接口
+	chatGroup := basic.Group("/chat", middlewares.AuthCheck())
+	{
+		// 获取用户聊天消息列表
+		chatGroup.GET("/chatlist", ctrl.ChatList)
+	}
 }

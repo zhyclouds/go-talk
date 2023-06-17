@@ -29,6 +29,9 @@ var (
 	IsFriendErrorStatus     = newStatus(40015, "已经是好友了")
 	AddFriendErrorStatus    = newStatus(40016, "添加好友失败")
 	PasswordErrorStatus     = newStatus(40017, "密码错误")
+	RoomIdentityEmptyStatus = newStatus(40018, "房间号为空")
+	NoValidErrorStatus      = newStatus(40019, "非法访问房间")
+	ChatListErrorStatus     = newStatus(40020, "获取房间列表失败")
 
 	// 401 WITHOUT PERMISSION
 	NoLoginErrorStatus = newStatus(40101, "用户未登录")
